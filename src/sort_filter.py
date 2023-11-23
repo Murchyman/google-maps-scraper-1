@@ -57,54 +57,30 @@ def list_contains_string(string_list, target_string):
     return False
 
 
-def filter_places(ls, filter_data):
-    def fn(i):
-        min_rating = filter_data.get("min_rating")
-        max_rating = filter_data.get("max_rating")
-        min_reviews = filter_data.get("min_reviews")
-        max_reviews = filter_data.get("max_reviews")
-        has_phone = filter_data.get("has_phone")
-        has_website = filter_data.get("has_website")
-        category_in = filter_data.get("category_in")
-
-        rating = i.get('rating')
-        reviews = i.get('reviews')
-        web_site = i.get("website")
-        phone = i.get("phone")
-        main_category = i.get("main_category")
-
-        if category_in and (not list_contains_string(category_in, main_category)):
-            return False
-
-        if min_rating is not None and (rating == '' or rating is None or rating < min_rating):
-            return False
-        
-        if max_rating is not None and (rating == '' or rating is None or rating > max_rating):
-            return False
-
-        if min_reviews is not None and (reviews == '' or reviews is None or reviews < min_reviews):
-            return False
-
-        if max_reviews is not None and (reviews == '' or reviews is None or reviews > max_reviews):
-            return False
-
-        if has_website is not None:
-            if (has_website is False and web_site is not None):
-                return False
-
-            if (has_website is True and web_site is None):
-                return False
-
-        if has_phone is not None:
-            if (has_phone is True and (phone is None or phone == '')):
-                return False
-
-            if (has_phone is False and (not (phone is None or phone == ''))):
-                return False
-
-        return True
-
-    return list(filter(fn, ls))
+def filter_places(places, filter_data):
+    filtered_places = []
+    for place in places:
+        if filter_data.get("min_rating") and place.get("rating") and place["rating"] < filter_data["min_rating"]:
+            continue
+        if filter_data.get("max_rating") and place.get("rating") and place["rating"] > filter_data["max_rating"]:
+            continue
+        if filter_data.get("min_reviews") and place.get("reviews") and place["reviews"] < filter_data["min_reviews"]:
+            continue
+        if filter_data.get("max_reviews") and place.get("reviews") and place["reviews"] > filter_data["max_reviews"]:
+            continue
+        if filter_data.get("has_phone") is not None and (place.get("phone") is None) == filter_data["has_phone"]:
+            continue
+        if filter_data.get("has_website") is not None:
+            website = place.get("website")
+            if website is None or "facebook.com" in website:
+                if filter_data["has_website"]:
+                    continue
+            elif not filter_data["has_website"]:
+                continue
+        if filter_data.get("category_in") and place.get("main_category") not in filter_data["category_in"]:
+            continue
+        filtered_places.append(place)
+    return filtered_places
 
 
 def sort_dict_by_keys(dictionary, keys):
